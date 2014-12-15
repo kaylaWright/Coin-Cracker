@@ -1,0 +1,13 @@
+package com.gameObjects;
+
+import com.example.spherebreak.framework.Game;
+
+public class Number 
+{
+	public int value;
+	
+	public void Render(Game _game) 
+	{
+		
+	}
+}

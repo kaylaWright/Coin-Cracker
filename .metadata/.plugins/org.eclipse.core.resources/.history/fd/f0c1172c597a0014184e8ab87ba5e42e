@@ -1,0 +1,27 @@
+package com.gameObjects;
+
+import com.example.spherebreak.framework.Game;
+import com.example.spherebreak.framework.Graphics;
+import com.sphereBreak.Assets;
+
+public class Number 
+{
+	private int value;
+	public int xPos, yPos;
+	
+	public void IncrementNumber()
+	{
+		value++;
+	}
+	
+	public int GetNumber()
+	{
+		return value;
+	}
+	
+	public void Render(Game _game) 
+	{
+		Graphics g = _game.GetGraphics();
+		g.DrawPixmap(Assets.numbers, 
+	}
+}

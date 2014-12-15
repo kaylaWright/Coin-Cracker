@@ -1,0 +1,396 @@
+package com.sphereBreak;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import android.app.Activity;
+import android.widget.TextView;
+
+import com.example.spherebreak.framework.Game;
+import com.example.spherebreak.framework.Graphics;
+import com.example.spherebreak.framework.iInput.TouchEvent;
+import com.example.spherebreak.framework.Screen;
+
+import com.gameObjects.*;
+
+public class GameScreen extends Screen
+{
+	private boolean isPaused = false;
+	
+	//show turn count and goal.
+	private int currentTurn;
+	private int goalTurns;
+	private DisplayNumber[] turns;
+	
+	//show sphere count and goal.
+	private int currentCoins;
+	private int goalCoins;
+	private DisplayNumber[] goals;
+	
+	private List<DisplayNumber> numberList = new ArrayList<DisplayNumber>();
+	//show timer (in hard).
+	
+	//centre coins.
+	private CentreCoin centreCoin;
+	//entry coins
+	private EntryCoin[] entryCoins;
+	//game coins
+	private SelectionCoin[] selectionCoins;
+	//list of all coins for rendering purposes.
+	private List<Coins> coinList = new ArrayList<Coins>();
+	
+	public GameScreen(Game _game)
+	{
+		super(_game);
+		
+		currentTurn = 1;
+		currentCoins = 0;
+		
+		if(SphereBreakGame.isHard)
+		{
+			goalTurns = 15;
+			goalCoins = 50;
+		}
+		else
+		{
+			goalTurns = 20;
+			goalCoins = 40;
+		}
+	
+		//turn gui.
+		turns = new DisplayNumber[5];
+		turns[0] = new DisplayNumber(0, 0, 0);
+		turns[1] = new DisplayNumber(currentTurn % 10, DisplayNumber.numWidth, 0);
+		turns[2] = new DisplayNumber(10, DisplayNumber.numWidth * 2, 0);
+		turns[3] = new DisplayNumber((goalTurns / 10) % 10, DisplayNumber.numWidth * 3, 0);
+		turns[4] = new DisplayNumber(goalTurns % 10, DisplayNumber.numWidth * 4, 0);
+		
+		for(DisplayNumber number: turns)
+		{
+			numberList.add(number);
+		}
+		
+		//goal gui.
+		goals = new DisplayNumber[5];
+		goals[0] = new DisplayNumber(0, 0, 23);
+		goals[1] = new DisplayNumber(currentCoins % 10, DisplayNumber.numWidth, 23);
+		goals[2] = new DisplayNumber(10, DisplayNumber.numWidth * 2, 23);
+		goals[3] = new DisplayNumber((goalCoins / 10) % 10, DisplayNumber.numWidth * 3, 23);
+		goals[4] = new DisplayNumber(goalCoins % 10, DisplayNumber.numWidth * 4, 23);
+		
+		for(DisplayNumber number: goals)
+		{
+			numberList.add(number);
+		}
+		
+		//instantiating all coins.
+		centreCoin = new CentreCoin((SphereBreakGame.screenWidth / 4 + 5), (SphereBreakGame.screenHeight / 4));
+		coinList.add(centreCoin);
+		
+		entryCoins = new EntryCoin[4];
+		entryCoins[0] = new EntryCoin(centreCoin.xPos - Coins.coinSize, centreCoin.yPos);
+		entryCoins[1] = new EntryCoin(centreCoin.xPos, centreCoin.yPos - Coins.coinSize);
+		entryCoins[2] = new EntryCoin(centreCoin.xPos, centreCoin.yPos + Coins.coinSize);
+		entryCoins[3] = new EntryCoin(centreCoin.xPos + Coins.coinSize, centreCoin.yPos);
+		CheckEntryCoins();
+		for(EntryCoin coins: entryCoins)
+		{
+			coinList.add(coins);
+		}
+		
+		selectionCoins = new SelectionCoin[8];
+		selectionCoins[0] = new SelectionCoin(centreCoin.xPos - Coins.coinSize * 2, centreCoin.yPos);
+		selectionCoins[1] = new SelectionCoin(centreCoin.xPos + Coins.coinSize * 2, centreCoin.yPos);
+		selectionCoins[2] = new SelectionCoin(centreCoin.xPos, centreCoin.yPos - Coins.coinSize * 2);
+		selectionCoins[3] = new SelectionCoin(centreCoin.xPos, centreCoin.yPos + Coins.coinSize * 2);
+		selectionCoins[4] = new SelectionCoin(centreCoin.xPos - Coins.coinSize, centreCoin.yPos - Coins.coinSize);
+		selectionCoins[5] = new SelectionCoin(centreCoin.xPos - Coins.coinSize, centreCoin.yPos + Coins.coinSize);
+		selectionCoins[6] = new SelectionCoin(centreCoin.xPos + Coins.coinSize, centreCoin.yPos - Coins.coinSize);
+		selectionCoins[7] = new SelectionCoin(centreCoin.xPos + Coins.coinSize, centreCoin.yPos + Coins.coinSize);
+		for(SelectionCoin coins: selectionCoins)
+		{
+			coinList.add(coins);
+		}
+	}
+
+	@Override
+	public void update(float _dt) 
+	{
+		Graphics g = game.GetGraphics();
+		List<TouchEvent> events = game.GetInput().GetTouchEvents();
+		game.GetInput().GetKeyEvents();
+		
+		int l = events.size();
+		for(int i = 0; i < l; i++)
+		{
+			TouchEvent e = events.get(i);
+			if(e.type == TouchEvent.TOUCH_UP)
+			{
+				if(!isPaused)
+				{
+					//toggle pause.
+					if(InBounds(e, 246, 416, 64, 64))
+					{
+						Settings.areSFXEnabled = !Settings.areSFXEnabled;
+						if(Settings.areSFXEnabled)
+							Assets.menuSFX.Play(1.0f);
+						
+						isPaused = !isPaused;
+					}
+					
+					//toggle sfx.
+					if(InBounds(e, 0, g.GetHeight() - 64, 64, 64))
+					{
+						Settings.areSFXEnabled = !Settings.areSFXEnabled;
+						if(Settings.areSFXEnabled)
+							Assets.menuSFX.Play(1.0f);
+					}
+					
+					//toggle music.
+					if(InBounds(e, 64, g.GetHeight() - 64, 64, 64))
+					{
+						Settings.isMusicEnabled = !Settings.isMusicEnabled;
+						if(Settings.isMusicEnabled)
+							Assets.backgroundMusic.Play();
+						else
+							Assets.backgroundMusic.Pause();
+					}
+					
+					//check to see if the event happened on an entry coin.
+					for(EntryCoin coin: entryCoins)
+					{
+						if(InBounds(e, coin.xPos, coin.yPos, Coins.coinSize, Coins.coinSize) && coin.GetCoinValue() < 10)
+						{
+							coin.ChangeSelected();	
+							Assets.coinSFX.Play(1.0f);
+							
+							CheckGoal();
+							CheckWin();
+						}
+					}
+					
+					//check to see if the event happened on a selection coin AND an entry coin is selected.
+					for(SelectionCoin coin: selectionCoins)
+					{
+						if(InBounds(e, coin.xPos, coin.yPos, Coins.coinSize, Coins.coinSize) && coin.GetCoinValue() < 10 && CheckEntryCoinSelected())
+						{
+							coin.ChangeSelected();	
+							Assets.coinSFX.Play(1.0f);
+							
+							CheckGoal();
+							CheckWin();
+						}
+					}	
+					
+					//no need to check the center coin; it's fixed. 
+				}
+				else
+				{
+					//unpause
+					if(InBounds(e, 0, 70, 194, 70))
+					{
+						Settings.areSFXEnabled = !Settings.areSFXEnabled;
+						if(Settings.areSFXEnabled)
+							Assets.menuSFX.Play(1.0f);
+						
+						isPaused = !isPaused;
+					}
+					
+					
+					//to main menu
+					if(InBounds(e, 0, 140, 194, 70))
+					{
+						Settings.areSFXEnabled = !Settings.areSFXEnabled;
+						if(Settings.areSFXEnabled)
+							Assets.menuSFX.Play(1.0f);
+						
+						game.SetScreen(new MainMenuScreen(game));
+					}
+					
+					//quit
+					if(InBounds(e, 0, 210, 194, 70))
+					{
+						Settings.areSFXEnabled = !Settings.areSFXEnabled;
+						if(Settings.areSFXEnabled)
+							Assets.menuSFX.Play(1.0f);
+						
+						//quit logic. 
+					}
+				}
+			}
+		}
+	}
+
+	@Override
+	public void present(float _dt) 
+	{
+		Graphics g = game.GetGraphics();
+		
+		g.DrawPixmap(Assets.background, 0, 0);
+		
+		if(isPaused)
+		{
+			g.DrawPixmap(Assets.pauseMenu, 0, 0);
+		}
+		else
+		{
+			g.DrawPixmap(Assets.guiElements, 246, 416, 64, 0, 64, 64);
+			
+			//scoring.
+			g.DrawPixmap(Assets.guiScore, 0, 0);
+			
+			//sounds related.
+			//int _x, int _y, int _srcX, int _srcY, int _srcWidth, int _srcHeight)
+			if(Settings.areSFXEnabled)
+			{
+				g.DrawPixmap(Assets.guiElements, 0, 416, 0, 64, 64, 64);
+			}
+			else
+			{
+				g.DrawPixmap(Assets.guiElements, 0, 416, 64, 64, 64, 64);
+			}
+			
+			//to the right of the sound toggler.
+			if(Settings.isMusicEnabled)
+			{
+				g.DrawPixmap(Assets.guiElements, 64, 416, 0, 128, 64, 64);
+			}
+			else
+			{
+				g.DrawPixmap(Assets.guiElements, 64, 416, 64, 128, 64, 64);
+			}
+			
+			for(Coins coin: coinList)
+			{
+				coin.Render(game);
+			}
+			
+			for(DisplayNumber number: numberList)
+			{
+				number.Render(game);
+			}
+		}
+		
+		
+		
+	}
+
+	@Override
+	public void pause() 
+	{
+		
+	}
+
+	@Override
+	public void resume() 
+	{
+		
+	}
+
+	@Override
+	public void dispose() 
+	{
+		
+	}
+	
+	private void CheckEntryCoins()
+	{
+		List<Integer> temp = new ArrayList<Integer>();
+		
+		for(int i= 0; i < entryCoins.length; i++)
+		{
+			while(temp.contains(entryCoins[i].GetCoinValue()))
+			{
+				entryCoins[i].SetRandomValue();
+			}
+			
+			temp.add(entryCoins[i].GetCoinValue());
+		}
+		
+		temp.clear();
+		                                              
+	}
+	
+	private boolean CheckEntryCoinSelected()
+	{
+		for(EntryCoin coin: entryCoins)
+		{
+			if(coin.isSelected)
+				return true;
+		}
+		
+		return false;
+	}
+	
+	private void CheckGoal()
+	{
+		int totalPoints = 0;
+		int currentlySelectedCoins = 0;
+		
+		//tabulate the total point value that has been selected.
+		for(Coins coin: coinList)
+		{
+			if(coin.isSelected && coin.getClass() != CentreCoin.class)
+				totalPoints += coin.GetCoinValue();
+				currentlySelectedCoins++;
+		}
+		
+		//if the total points is a multiple of the centre coin's values, goal has been met.
+		if(totalPoints > 0 && (totalPoints % centreCoin.GetCoinValue()) == 0)
+		{
+			for(Coins coin: coinList)
+			{
+				if(coin.getClass() == SelectionCoin.class)
+				{
+					if(coin.isSelected)
+					{
+						coin.SetCoinValue(10);
+					}
+					else	
+					{
+						coin.IncreaseCoinValue();
+					}
+				}
+			}
+			
+			centreCoin.SetRandomValue();
+			
+			UpdateScoring(currentlySelectedCoins);
+			UnselectAllCoins();
+		}
+	}
+	
+	private void CheckWin()
+	{
+		if(currentCoins >= goalCoins && currentTurn <= goalTurns)
+		{
+			//do victory things. 
+		}
+		
+		if(currentTurn > goalTurns && currentCoins < goalCoins)
+		{
+			//do loss things. 
+		}
+	}
+	
+	private void UnselectAllCoins()
+	{
+		for(Coins coin: coinList)
+		{
+			coin.isSelected = false;
+		}
+	}
+	
+	private void UpdateScoring(int _currentlySelectedCoins)
+	{
+		currentTurn += 1;	
+		turns[0].numValue = currentTurn;
+		turns[1].numValue = currentTurn;
+		
+		currentCoins += _currentlySelectedCoins;
+		turns[0].numValue = currentCoins;
+		turns[1].numValue = currentCoins;
+	}
+}

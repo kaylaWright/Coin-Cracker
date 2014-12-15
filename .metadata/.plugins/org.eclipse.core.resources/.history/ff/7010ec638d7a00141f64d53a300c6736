@@ -1,0 +1,98 @@
+package com.sphereBreak;
+
+import com.example.spherebreak.framework.Game;
+import com.example.spherebreak.framework.Graphics;
+import com.example.spherebreak.framework.Screen;
+
+public class EndGameScreen extends Screen
+{
+	private boolean isWin = false;
+	
+	public EndGameScreen(boolean _isWin, Game _game)
+	{
+		super(_game);
+		
+		isWin = _isWin;
+		
+		if(Settings.isMusicEnabled)
+		{
+			Assets.backgroundMusic.Play();
+		}
+	}
+
+	@Override
+	public void update(float _dt) 
+	{
+		
+		
+		if(InBounds(e, 0, 140, 192, 64))
+		{
+			if(Settings.areSFXEnabled)
+				Assets.menuSFX.Play(1.0f);
+			
+			game.SetScreen(new OptionScreen(game));
+		}
+	
+		//quit
+		if(InBounds(e, 0, 210, 192, 64))
+		{
+			if(Settings.areSFXEnabled)
+				Assets.menuSFX.Play(1.0f);
+			
+			game.SetScreen(new QuitScreen(game));
+		}
+	}
+
+	@Override
+	public void present(float _dt) 
+	{
+Graphics g = game.GetGraphics();
+		
+		g.DrawPixmap(Assets.background, 0, 0);
+		
+		if(isWin)
+		{
+			g.DrawPixmap(Assets.winMenu, 0, 0);
+		}
+		else
+		{
+			g.DrawPixmap(Assets.lossMenu, 0, 0);
+		}
+		
+		//int _x, int _y, int _srcX, int _srcY, int _srcWidth, int _srcHeight)
+		if(Settings.areSFXEnabled)
+		{
+			g.DrawPixmap(Assets.guiElements, 0, 416, 0, 64, 64, 64);
+		}
+		else
+		{
+			g.DrawPixmap(Assets.guiElements, 0, 416, 64, 64, 64, 64);
+		}
+		
+		//to the right of the sound toggler.
+		if(Settings.isMusicEnabled)
+		{
+			g.DrawPixmap(Assets.guiElements, 64, 416, 0, 128, 64, 64);
+		}
+		else
+		{
+			g.DrawPixmap(Assets.guiElements, 64, 416, 64, 128, 64, 64);
+		}
+	}
+
+	@Override
+	public void pause() 
+	{
+	}
+
+	@Override
+	public void resume() 
+	{
+	}
+
+	@Override
+	public void dispose() 
+	{
+	}
+
+}

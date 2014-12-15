@@ -1,0 +1,23 @@
+package com.gameObjects;
+
+import com.example.spherebreak.framework.Game;
+
+public class Number 
+{
+	private int value;
+	
+	public void IncrementNumber()
+	{
+		value++;
+	}
+	
+	public int GetNumber()
+	{
+		return value;
+	}
+	
+	public void Render(Game _game) 
+	{
+		
+	}
+}

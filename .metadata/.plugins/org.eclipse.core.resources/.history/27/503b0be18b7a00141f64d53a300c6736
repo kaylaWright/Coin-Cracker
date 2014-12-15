@@ -1,0 +1,46 @@
+package com.sphereBreak;
+
+import com.example.spherebreak.framework.Game;
+import com.example.spherebreak.framework.Screen;
+
+public class EndGameScreen extends Screen
+{
+	private boolean isWin = false;
+	
+	public EndGameScreen(boolean _isWin, Game _game)
+	{
+		super(_game);
+		
+		if(Settings.isMusicEnabled)
+		{
+			Assets.backgroundMusic.Play();
+		}
+	}
+
+	@Override
+	public void update(float _dt) 
+	{
+
+	}
+
+	@Override
+	public void present(float _dt) 
+	{
+	}
+
+	@Override
+	public void pause() 
+	{
+	}
+
+	@Override
+	public void resume() 
+	{
+	}
+
+	@Override
+	public void dispose() 
+	{
+	}
+
+}

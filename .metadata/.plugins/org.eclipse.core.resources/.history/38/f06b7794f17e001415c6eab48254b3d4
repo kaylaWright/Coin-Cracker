@@ -1,0 +1,110 @@
+package com.sphereBreak;
+
+import java.util.List;
+
+import com.example.spherebreak.framework.Game;
+import com.example.spherebreak.framework.Graphics;
+import com.example.spherebreak.framework.Pixmap;
+import com.example.spherebreak.framework.iInput;
+import com.example.spherebreak.framework.iInput.TouchEvent;
+import com.example.spherebreak.framework.Screen;
+
+public class InstructionScreen extends Screen
+{
+	public InstructionScreen(Game _game)
+	{
+		super(_game);
+	}
+
+	@Override
+	public void update(float _dt) 
+	{
+		Graphics g = game.GetGraphics();
+		List<TouchEvent> events = game.GetInput().GetTouchEvents();
+		game.GetInput().GetKeyEvents();
+		
+		int l = events.size();
+		for(int i = 0; i < l; i++)
+		{
+			TouchEvent e = events.get(i);
+			if(e.type == TouchEvent.TOUCH_UP)
+			{
+				if(InBounds(e, 0, 0, 64, 64))
+				{
+					if(Settings.areSFXEnabled)
+						Assets.menuSFX.Play(1.0f);
+					
+					game.SetScreen(new MainMenuScreen(game));
+				}
+				
+				//toggle sfx.
+				if(InBounds(e, 0, g.GetHeight() - 64, 64, 64))
+				{
+					Settings.areSFXEnabled = !Settings.areSFXEnabled;
+					if(Settings.areSFXEnabled)
+						Assets.menuSFX.Play(1.0f);
+				}
+				
+				//toggle music.
+				if(InBounds(e, 64, g.GetHeight() - 64, 64, 64))
+				{
+					Settings.isMusicEnabled = !Settings.isMusicEnabled;
+					if(Settings.isMusicEnabled)
+						Assets.backgroundMusic.Play();
+					else
+						Assets.backgroundMusic.Pause();
+				}
+			}
+		}
+	}
+
+	@Override
+	public void present(float _dt) 
+	{
+		Graphics g = game.GetGraphics();
+		
+		g.DrawPixmap(Assets.background, 0, 0);
+		
+		g.DrawPixel(Assets.instructions, 0, 0);
+		
+		////int _x, int _y, int _srcX, int _srcY, int _srcWidth, int _srcHeight)
+		g.DrawPixmap(Assets.guiElements, 0, 0, 0, 0, 64, 64);
+		
+		if(Settings.areSFXEnabled)
+		{
+			g.DrawPixmap(Assets.guiElements, 0, 416, 0, 64, 64, 64);
+		}
+		else
+		{
+			g.DrawPixmap(Assets.guiElements, 0, 416, 64, 64, 64, 64);
+		}
+		
+		//to the right of the sound toggler.
+		if(Settings.isMusicEnabled)
+		{
+			g.DrawPixmap(Assets.guiElements, 64, 416, 0, 128, 64, 64);
+		}
+		else
+		{
+			g.DrawPixmap(Assets.guiElements, 64, 416, 64, 128, 64, 64);
+		}
+	}
+
+	@Override
+	public void pause() 
+	{
+		
+	}
+
+	@Override
+	public void resume() 
+	{
+		
+	}
+
+	@Override
+	public void dispose() 
+	{
+		
+	}
+}

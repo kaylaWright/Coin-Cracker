@@ -1,0 +1,38 @@
+package com.sphereBreak;
+
+import com.example.spherebreak.framework.Screen;
+
+public class EndGameScreen extends Screen
+{
+	public EndGameScreen(bool _isWin, Game _game)
+	{
+		super(_game);
+	}
+
+	@Override
+	public void update(float _dt) 
+	{
+
+	}
+
+	@Override
+	public void present(float _dt) 
+	{
+	}
+
+	@Override
+	public void pause() 
+	{
+	}
+
+	@Override
+	public void resume() 
+	{
+	}
+
+	@Override
+	public void dispose() 
+	{
+	}
+
+}

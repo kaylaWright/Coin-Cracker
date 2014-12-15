@@ -1,0 +1,38 @@
+package com.gameObjects;
+
+import com.example.spherebreak.framework.Game;
+import com.example.spherebreak.framework.Graphics;
+import com.sphereBreak.Assets;
+
+public class Number 
+{
+	private int value;
+	private int width;
+	public int xPos, yPos;
+	
+	public Number(int _val)
+	{
+		value = _val;
+	}
+	
+	public void IncrementNumber()
+	{
+		value++;
+		if(value > 11)
+		{
+			
+		}
+	}
+	
+	public int GetNumber()
+	{
+		return value;
+	}
+	
+	public void Render(Game _game) 
+	{
+		Graphics g = _game.GetGraphics();
+		////pixmap, int _x, int _y, int _srcX, int _srcY, int _srcWidth, int _srcHeight)
+		g.DrawPixmap(Assets.numbers, xPos, yPos, (width * (value)),0);
+	}
+}

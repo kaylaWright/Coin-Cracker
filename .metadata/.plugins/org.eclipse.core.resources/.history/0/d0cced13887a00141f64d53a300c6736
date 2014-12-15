@@ -1,0 +1,6 @@
+package com.sphereBreak;
+
+public class EndGameScreen extends Screen
+{
+
+}
